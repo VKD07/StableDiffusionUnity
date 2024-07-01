@@ -43,7 +43,7 @@ public class ImageGenerationManager : MonoBehaviour
     {
 
         string promptValue = "Cats";
-        string json = "{\r\n \"prompt\": \" "+ promptText + "\",\r\n  \"init_images\": [\r\n    \"" + ConvertImageToBase64(imgPath) +"\"\r\n  ]\r\n}";
+        string json = "{\r\n \"prompt\": \" "+ promptText.text + "\",\r\n  \"init_images\": [\r\n    \"" + ConvertImageToBase64(imgPath) +"\"\r\n  ]\r\n}";
 
 
         Debug.Log(json);

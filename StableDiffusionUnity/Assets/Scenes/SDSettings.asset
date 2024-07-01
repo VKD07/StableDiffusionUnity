@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd9d35f3d76fcca4f84605c37ab37c55, type: 3}
+  m_Name: SDSettings
+  m_EditorClassIdentifier: 
+  m_isInitialized: 1
+  m_webSettings:
+    serverURL: http://127.0.0.1:7860
+    getSDModelsAPI: /sdapi/v1/sd-models
+    getSamplersAPI: /sdapi/v1/samplers
+    getProgressAPI: /sdapi/v1/progress
+    getOptionsAPI: /sdapi/v1/options
+    getControlNetModelsAPI: /controlnet/model_list
+    postTxt2ImgAPI: /sdapi/v1/txt2img
+    postImg2ImgAPI: /sdapi/v1/img2img
+    postOptionsAPI: /sdapi/v1/options
+    postControlNetTxt2ImgAPI: /sdapi/v1/txt2img
+    postControlNetImg2ImgAPI: /sdapi/v1/img2img
+  m_sdModels: []
+  m_samplers: []
+  m_controlNetModels: []
+  m_basicParameters:
+    prompt: 
+    negativePrompt: worst quality,low quality, bad quality, text,jpeg artifacts,
+      extra digit, fewer digits, cropped
+    sampler:
+      m_name: Euler
+    width: 512
+    height: 512
+    steps: 20
+    cfgScale: 7
+    seed: -1
+    tiling: 0
+  m_controlNetParameters:
+    lowvram: 0
+    guessmode: 0
+    module: 0
+    model:
+      m_name: 
+    weight: 1
+    guidance_start: 0
+    guidance_end: 1
+    processor_res: 512
+    threshold_a: 64
+    threshold_b: 64

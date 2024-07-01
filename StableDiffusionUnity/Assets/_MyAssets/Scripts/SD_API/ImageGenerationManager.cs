@@ -14,11 +14,10 @@ using Debug = UnityEngine.Debug;
 public class ImageGenerationManager : MonoBehaviour
 {
 
+    [SerializeField] TMP_InputField promptText;
+    [SerializeField, Range(0, 30)] int cfgScaleValue = 30;
+    [SerializeField] string imgPath;
     string myPersistentDataPath;
-
-    public TMP_InputField promptText;
-
-    public string imgPath;
     public void GenerateImage()
     {
         if (promptText.text == "" || promptText.text == "Please enter a prompt")
@@ -35,38 +34,47 @@ public class ImageGenerationManager : MonoBehaviour
     private void Awake()
     {
         myPersistentDataPath = Application.persistentDataPath + "\\";
-        Debug.Log(myPersistentDataPath);
     }
 
 
     IEnumerator MakeRequest()
     {
-
-        string promptValue = "Cats";
-        string json = "{\r\n \"prompt\": \" "+ promptText.text + "\",\r\n  \"init_images\": [\r\n    \"" + ConvertImageToBase64(imgPath) +"\"\r\n  ]\r\n}";
-
+        //string json = "{\r\n \"prompt\": \" " + promptText.text + "\",\r\n  \"init_images\": [\r\n    \"" + ConvertImageToBase64(imgPath) + "\"\r\n  ]\r\n}";
+        string json = $@"{{
+  ""prompt"": ""{promptText.text}"",
+  ""init_images"": [
+    ""{ConvertImageToBase64(imgPath)}""
+  ],
+  ""cfg_scale"": {cfgScaleValue}
+}}";
 
         Debug.Log(json);
 
+        //converting json file to Bytes
         var jsonBytes = Encoding.UTF8.GetBytes(json);
 
+        //Requesting from Website for a post request
         var www = new UnityWebRequest("http://127.0.0.1:7860/sdapi/v1/img2img", "POST");
 
+        //Uploading the bytes to the website
         www.uploadHandler = new UploadHandlerRaw(jsonBytes);
+        //Receiving the data received from the requested website
         www.downloadHandler = new DownloadHandlerBuffer();
+        //SEtting Header request
         www.SetRequestHeader("Content-Type", "application/json");
         www.SetRequestHeader("Accept", " text/plain");
-
+        //Send web request
         yield return www.SendWebRequest();
 
+        //Checking for errors
         if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
         {
             Debug.Log(www.error);
         }
         else
         {
+            //storing string from website to image data
             string imageData = www.downloadHandler.text;
-
             //Converting Json data, to image data
             ImageData myImageData = JsonConvert.DeserializeObject<ImageData>(imageData);
 
@@ -78,125 +86,15 @@ public class ImageGenerationManager : MonoBehaviour
 
             string newImageFileName = "image_" + newImageFileNumber + ".png";
 
-
+            //Adding the generated image to file path
             File.WriteAllBytes(Path.Combine(Application.persistentDataPath, newImageFileName), Convert.FromBase64String(myImageData.images[0]));
-
+            //UIManager.instance.SetGeneratedImageUI()
             www.Dispose();
 
             Process.Start(myPersistentDataPath);
         }
 
     }
-
-    IEnumerator MakeRequestImg()
-    {
-        // Read the image file and convert it to Base64
-        string imagePath = "C:\\Users\\vince\\Documents\\GitHub\\StableDiffusionUnity\\StableDiffusionUnity\\Assets\\Cat.png";  // Replace with your actual image path
-        string base64Image = ConvertImageToBase64(imagePath);
-
-        if (base64Image == null)
-        {
-            Debug.LogError("Failed to convert image to Base64.");
-            yield break;
-        }
-
-        #region promptPayloadExample
-        /*
-            {
-                "enable_hr": false,
-                "denoising_strength": 0,
-                "firstphase_width": 0,
-                "firstphase_height": 0,
-                "hr_scale": 2,
-                "hr_upscaler": "string",
-                "hr_second_pass_steps": 0,
-                "hr_resize_x": 0,
-                "hr_resize_y": 0,
-                "prompt": "",
-                "styles": [
-                  "string"
-                ],
-                "seed": -1,
-                "subseed": -1,
-                "subseed_strength": 0,
-                "seed_resize_from_h": -1,
-                "seed_resize_from_w": -1,
-                "sampler_name": "string",
-                "batch_size": 1,
-                "n_iter": 1,
-                "steps": 50,
-                "cfg_scale": 7,
-                "width": 512,
-                "height": 512,
-                "restore_faces": false,
-                "tiling": false,
-                "negative_prompt": "string",
-                "eta": 0,
-                "s_churn": 0,
-                "s_tmax": 0,
-                "s_tmin": 0,
-                "s_noise": 1,
-                "override_settings": {},
-                "override_settings_restore_afterwards": true,
-                "sampler_index": "Euler"
-          }
-        */
-        #endregion
-
-        // Construct JSON payload with prompt and image
-        string paramKey_prompt = "\"prompt\":";
-        string paramValue_prompt = "\"" + promptText.text + "\"";
-
-        string json = base64Image;
-
-        Debug.Log("Request JSON: " + json);
-
-        // Convert JSON to bytes
-        var jsonBytes = Encoding.UTF8.GetBytes(json);
-
-        // Create UnityWebRequest
-        var www = new UnityWebRequest("http://127.0.0.1:7860/sdapi/v1/img2img", "POST");
-
-        www.uploadHandler = new UploadHandlerRaw(jsonBytes);
-        www.downloadHandler = new DownloadHandlerBuffer();
-        www.SetRequestHeader("Content-Type", "application/json");
-        www.SetRequestHeader("Accept", "text/plain");
-
-        yield return www.SendWebRequest();
-
-        if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-        {
-            Debug.LogError("Request Error: " + www.error);
-        }
-        else
-        {
-            string imageData = www.downloadHandler.text;
-            Debug.Log("Response: " + imageData);
-
-            // Process the response as needed
-            // Example: Deserialize JSON response
-            try
-            {
-                ImageData myImageData = JsonConvert.DeserializeObject<ImageData>(imageData);
-                Debug.Log("Image URL: " + myImageData.images[0]);
-
-                // Save image locally
-                string newImageFileNumber = GetNextImageNumberForFileName(true);
-                string newImageFileName = "image_" + newImageFileNumber + ".png";
-                File.WriteAllBytes(Path.Combine(Application.persistentDataPath, newImageFileName), Convert.FromBase64String(myImageData.images[0]));
-
-                // Open the folder containing the saved image
-                Process.Start(myPersistentDataPath);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError("Deserialization Error: " + ex.Message);
-            }
-        }
-
-        www.Dispose();
-    }
-
 
     string GetNextImageNumberForFileName(bool isNewImageFile)
     {
@@ -266,40 +164,6 @@ public class ImageGenerationManager : MonoBehaviour
     }
 
 }
-
-
-public class Parameters
-{
-    public bool enable_hr { get; set; }
-    public int denoising_strength { get; set; }
-    public int firstphase_width { get; set; }
-    public int firstphase_height { get; set; }
-    public string prompt { get; set; }
-    public object styles { get; set; }
-    public int seed { get; set; }
-    public int subseed { get; set; }
-    public int subseed_strength { get; set; }
-    public int seed_resize_from_h { get; set; }
-    public int seed_resize_from_w { get; set; }
-    public object sampler_name { get; set; }
-    public int batch_size { get; set; }
-    public int n_iter { get; set; }
-    public int steps { get; set; }
-    public double cfg_scale { get; set; }
-    public int width { get; set; }
-    public int height { get; set; }
-    public bool restore_faces { get; set; }
-    public bool tiling { get; set; }
-    public object negative_prompt { get; set; }
-    public object eta { get; set; }
-    public double s_churn { get; set; }
-    public object s_tmax { get; set; }
-    public double s_tmin { get; set; }
-    public double s_noise { get; set; }
-    public object override_settings { get; set; }
-    public string sampler_index { get; set; }
-}
-
 
 public class ImageData
 {

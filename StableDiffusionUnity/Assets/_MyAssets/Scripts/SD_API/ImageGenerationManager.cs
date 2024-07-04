@@ -27,8 +27,6 @@ public class ImageGenerationManager : MonoBehaviour
     [SerializeField] bool lowVram;
     [SerializeField] bool pixelPerfect;
 
-
-
     [Header("=== GENERATED IMAGE SETTINGS ===")]
     [SerializeField] string generatedImgFolder;
     [SerializeField] string imageName;

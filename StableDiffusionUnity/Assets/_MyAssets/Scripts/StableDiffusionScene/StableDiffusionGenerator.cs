@@ -147,9 +147,7 @@ public class StableDiffusionGenerator : MonoBehaviour
     {
         List<int> imageNumbers = new List<int>();
 
-
         int maxImageNumber = 0;
-
 
         string[] files = Directory.GetFiles(myPersistentDataPath);
 
@@ -190,10 +188,9 @@ public class StableDiffusionGenerator : MonoBehaviour
         {
             strMaxImageNumber = "01";
         }
-
-
         return strMaxImageNumber;
     }
+
 
     public static string ConvertImageToBase64(string imagePath)
     {

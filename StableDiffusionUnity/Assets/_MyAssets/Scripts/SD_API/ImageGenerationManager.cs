@@ -15,12 +15,30 @@ using UnityEngine.UI;
 
 public class ImageGenerationManager : MonoBehaviour
 {
-
+    [Header("=== UI ===")]
     [SerializeField] TMP_InputField promptText;
+
+    [Header("=== IMG GENERATION SETTINGS ===")]
     [SerializeField, Range(0, 30)] int cfgScaleValue = 30;
     [SerializeField, Range(1, 150)] int sampleSteps = 10;
+
+    [Header("=== CONTROL NET SETTINGS ===")]
+    [SerializeField] ControlNetModels controlNetModels;
+    [SerializeField] bool lowVram;
+    [SerializeField] bool pixelPerfect;
+
+
+
+    [Header("=== GENERATED IMAGE SETTINGS ===")]
+    [SerializeField] string generatedImgFolder;
     [SerializeField] string imageName;
-    string myPersistentDataPath;
+    string generatedImgPath;
+
+    private void Awake()
+    {
+        generatedImgPath = Path.Combine(Application.streamingAssetsPath, generatedImgFolder);
+    }
+
     public void GenerateImage()
     {
         //if (promptText.text == "" || promptText.text == "Please enter a prompt")
@@ -34,48 +52,10 @@ public class ImageGenerationManager : MonoBehaviour
         //}
     }
 
-    private void Awake()
-    {
-        myPersistentDataPath = Application.streamingAssetsPath;
-    }
-
-
     IEnumerator MakeRequest()
     {
-        string json = $@"
-        {{
-            'prompt': '{promptText.text}',
-            'init_images': ['{ConvertImageToBase64(imageName)}'],
-            'cfg_scale': {cfgScaleValue},
-            'sampler_name': 'DPM++ 2M',
-            'steps': {sampleSteps},
-            'alwayson_scripts': {{
-                'controlnet': {{
-                    'args': [
-                        {{
-                            'enabled': true,
-                            'module': 'scribble_pidinet',
-                            'model': 'control_v11p_sd15_scribble',
-                            'image': '{ConvertImageToBase64(imageName)}',
-                            'weight': 1.0,
-                            'resize_mode': 'Crop and Resize',
-                            'lowvram': true,
-                            'processor_res': 64,
-                            'threshold_a': 64,
-                            'threshold_b': 64,
-                            'guidance_start': 0.0,
-                            'guidance_end': 1.0,
-                            'control_mode': 'ControlNet is more important',
-                            'pixel_perfect': true
-                        }}
-                    ]
-                }}
-            }}
-        }}";
-
-        json = json.Replace("'", "\""); // Ensure proper JSON formatting
         //converting json file to Bytes
-        var jsonBytes = Encoding.UTF8.GetBytes(json);
+        var jsonBytes = Encoding.UTF8.GetBytes(DiffusionJsonbody());
 
         //Requesting from Website for a post request
         var www = new UnityWebRequest("http://127.0.0.1:7860/sdapi/v1/txt2img", "POST");
@@ -93,7 +73,7 @@ public class ImageGenerationManager : MonoBehaviour
         //Checking for errors
         if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
         {
-            Debug.Log(www.error);
+            Debug.Log(www.error);   
         }
         else
         {
@@ -111,13 +91,67 @@ public class ImageGenerationManager : MonoBehaviour
             string newImageFileName = "image_" + newImageFileNumber + ".png";
 
             //Adding the generated image to file path
-            File.WriteAllBytes(Path.Combine(myPersistentDataPath, newImageFileName), Convert.FromBase64String(myImageData.images[0]));
+            File.WriteAllBytes(Path.Combine(generatedImgPath, newImageFileName), Convert.FromBase64String(myImageData.images[0]));
             //UIManager.instance.SetGeneratedImageUI()
             www.Dispose();
 
-            Process.Start(myPersistentDataPath);
+            Process.Start(generatedImgPath);
+
+            UIManager.instance.SetGeneratedImageUI(generatedImgPath);
         }
 
+    }
+
+    string DiffusionJsonbody()
+    {
+        string json = $@"
+        {{
+            'prompt': '{promptText.text}',
+            'init_images': ['{ConvertImageToBase64(imageName)}'],
+            'cfg_scale': {cfgScaleValue},
+            'sampler_name': 'DPM++ 2M',
+            'steps': {sampleSteps},
+            'alwayson_scripts': {{
+                'controlnet': {{
+                    'args': [
+                        {{
+                            'enabled': true,
+                            'module': 'scribble_pidinet',
+                            'model': '{controlNetModels.ToString().ToLower()}',
+                            'image': '{ConvertImageToBase64(imageName)}',
+                            'weight': 1.0,
+                            'resize_mode': 'Crop and Resize',
+                            'lowvram': {lowVram.ToString().ToLower()},
+                            'processor_res': 64,
+                            'threshold_a': 64,
+                            'threshold_b': 64,
+                            'guidance_start': 0.0,
+                            'guidance_end': 1.0,
+                            'control_mode': 'ControlNet is more important',
+                            'pixel_perfect': {pixelPerfect.ToString().ToLower()}
+                        }}
+                    ]
+                }}
+            }}
+        }}";
+
+        return json = json.Replace("'", "\""); // Ensure proper JSON formatting
+    }
+
+    public static string ConvertImageToBase64(string imgName)
+    {
+        try
+        {
+            string filePath = Path.Combine(Application.streamingAssetsPath, "Sketches", imgName);
+            byte[] imageBytes = File.ReadAllBytes(filePath);
+            string base64String = Convert.ToBase64String(imageBytes);
+            return base64String;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Error converting image to Base64: " + ex.Message);
+            return null;
+        }
     }
 
     string GetNextImageNumberForFileName(bool isNewImageFile)
@@ -128,7 +162,7 @@ public class ImageGenerationManager : MonoBehaviour
         int maxImageNumber = 0;
 
 
-        string[] files = Directory.GetFiles(Application.streamingAssetsPath);
+        string[] files = Directory.GetFiles(generatedImgPath);
 
         foreach (string file in files)
         {
@@ -171,23 +205,6 @@ public class ImageGenerationManager : MonoBehaviour
 
         return strMaxImageNumber;
     }
-
-    public static string ConvertImageToBase64(string imgName)
-    {
-        try
-        {
-            string filePath = Path.Combine(Application.streamingAssetsPath, "Sketches", imgName);
-            byte[] imageBytes = File.ReadAllBytes(filePath);
-            string base64String = Convert.ToBase64String(imageBytes);
-            return base64String;
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("Error converting image to Base64: " + ex.Message);
-            return null;
-        }
-    }
-
 }
 
 public class ImageData

@@ -354,6 +354,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding: {x: -8, y: -5, z: -8, w: -5}
   m_Softness: {x: 0, y: 0}
+--- !u!1 &411231293
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 411231294}
+  - component: {fileID: 411231295}
+  m_Layer: 0
+  m_Name: SpriteLoader_MANAGER
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &411231294
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411231293}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 655.8193, y: 430.1461, z: 0.03343673}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &411231295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411231293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a39c91afa60c6b24a97aa77d4969c4d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &437002304
 GameObject:
   m_ObjectHideFlags: 0
@@ -386,7 +430,11 @@ MonoBehaviour:
   promptText: {fileID: 1525172992}
   cfgScaleValue: 7
   sampleSteps: 10
-  imageName: Sample.jpg
+  controlNetModels: 1
+  lowVram: 1
+  pixelPerfect: 1
+  generatedImgFolder: GeneratedImages
+  imageName: House.jpg
 --- !u!4 &437002306
 Transform:
   m_ObjectHideFlags: 0
@@ -1315,7 +1363,7 @@ GameObject:
   - component: {fileID: 1613227462}
   - component: {fileID: 1613227463}
   m_Layer: 0
-  m_Name: UI_Manager
+  m_Name: UI_MANAGER
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1348,7 +1396,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d872760ec838e64db397d4af3fce683, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  generatedImage: {fileID: 71943260}
+  generatedImageUI: {fileID: 71943260}
+  spriteConverter: {fileID: 411231295}
 --- !u!1 &2136624204
 GameObject:
   m_ObjectHideFlags: 0
@@ -1426,4 +1475,5 @@ SceneRoots:
   - {fileID: 972672404}
   - {fileID: 437002306}
   - {fileID: 1613227462}
+  - {fileID: 411231294}
   - {fileID: 2136624207}

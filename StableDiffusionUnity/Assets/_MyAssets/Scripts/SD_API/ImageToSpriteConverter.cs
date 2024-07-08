@@ -13,7 +13,6 @@ public class ImageToSpriteConverter : MonoBehaviour
         {
             // Construct the full path to the image file within the Sketches folder
             string filePath = Path.Combine(generatedImgPath, GetTheLastGeneratedImageName(generatedImgPath));
-            Debug.Log(filePath);
             // Read the file bytes
             byte[] fileData = File.ReadAllBytes(filePath);
 

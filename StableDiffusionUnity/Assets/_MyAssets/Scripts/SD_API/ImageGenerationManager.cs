@@ -59,42 +59,31 @@ public class ImageGenerationManager : MonoBehaviour
         var jsonBytes = Encoding.UTF8.GetBytes(DiffusionJsonbody());
 
         //Requesting from Website for a post request
-        var www = new UnityWebRequest("http://127.0.0.1:7860/sdapi/v1/txt2img", "POST");
-
-        //Uploading the bytes to the website
-        www.uploadHandler = new UploadHandlerRaw(jsonBytes);
-        //Receiving the data received from the requested website
-        www.downloadHandler = new DownloadHandlerBuffer();
-        //SEtting Header request
-        www.SetRequestHeader("Content-Type", "application/json");
-        www.SetRequestHeader("Accept", " text/plain");
-        //Send web request
-        yield return www.SendWebRequest();
+        var postRequest = RequestFromWeb.CreateARequest("http://127.0.0.1:7860/sdapi/v1/txt2img", RequestType.POST, jsonBytes);
+        RequestFromWeb.AttachedHeader(postRequest, "Accept", " text/plain");
+        yield return postRequest.SendWebRequest();
 
         //Checking for errors
-        if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+        if (postRequest.result == UnityWebRequest.Result.ConnectionError || postRequest.result == UnityWebRequest.Result.ProtocolError)
         {
-            Debug.Log(www.error);   
+            Debug.Log(postRequest.error);
         }
         else
         {
             //storing string from website to image data
-            string imageData = www.downloadHandler.text;
+            string imageData = postRequest.downloadHandler.text;
             //Converting Json data, to image data
             ImageData myImageData = JsonConvert.DeserializeObject<ImageData>(imageData);
 
-            Debug.Log(myImageData.images[0]);
-
             //Getting image number
             string newImageFileNumber = GetNextImageNumberForFileName(true);
-            Debug.Log(newImageFileNumber);
 
             string newImageFileName = "image_" + newImageFileNumber + ".png";
 
             //Adding the generated image to file path
             File.WriteAllBytes(Path.Combine(generatedImgPath, newImageFileName), Convert.FromBase64String(myImageData.images[0]));
-            //UIManager.instance.SetGeneratedImageUI()
-            www.Dispose();
+
+            postRequest.Dispose();
 
             Process.Start(generatedImgPath);
 
@@ -159,9 +148,7 @@ public class ImageGenerationManager : MonoBehaviour
     {
         List<int> imageNumbers = new List<int>();
 
-
         int maxImageNumber = 0;
-
 
         string[] files = Directory.GetFiles(generatedImgPath);
 
@@ -202,8 +189,6 @@ public class ImageGenerationManager : MonoBehaviour
         {
             strMaxImageNumber = "01";
         }
-
-
         return strMaxImageNumber;
     }
 }

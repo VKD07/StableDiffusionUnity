@@ -6,17 +6,15 @@ using UnityEngine.Networking;
 
 public static class RequestFromWeb
 {
-    public static UnityWebRequest CreateARequest(string url, RequestType type = RequestType.GET, object data = null)
+    public static UnityWebRequest CreateARequest(string url, RequestType type = RequestType.GET, byte[]jsonByte = null)
     {
         var request = new UnityWebRequest(url, type.ToString());
 
         //if its a post request with data
-        if(data != null)
+        if(jsonByte != null)
         {
-            //converting object to Json file
-            var bodyRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
             //Uploading the data to the web
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.uploadHandler = new UploadHandlerRaw(jsonByte);
         }
         // get data from web
         request.downloadHandler = new DownloadHandlerBuffer();
@@ -24,7 +22,7 @@ public static class RequestFromWeb
         return request;
     }
 
-    static void AttachedHeader(UnityWebRequest request, string key, string value)
+    public static void AttachedHeader(UnityWebRequest request, string key, string value)
     {
         request.SetRequestHeader(key, value);
     }

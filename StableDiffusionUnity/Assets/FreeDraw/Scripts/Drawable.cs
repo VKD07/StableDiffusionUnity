@@ -4,8 +4,8 @@ using UnityEngine.EventSystems;
 
 namespace FreeDraw
 {
-    [RequireComponent(typeof(SpriteRenderer))]
-    [RequireComponent(typeof(Collider2D))]  // REQUIRES A COLLIDER2D to function
+    //[RequireComponent(typeof(SpriteRenderer))]
+    //[RequireComponent(typeof(Collider2D))]  // REQUIRES A COLLIDER2D to function
     // 1. Attach this to a read/write enabled sprite image
     // 2. Set the drawing_layers  to use in the raycast
     // 3. Attach a 2D collider (like a Box Collider 2D) to this sprite
@@ -16,7 +16,6 @@ namespace FreeDraw
         public static Color Pen_Colour = Color.red;     // Change these to change the default drawing settings
         // PEN WIDTH (actually, it's a radius, in pixels)
         public static int Pen_Width = 3;
-
 
         public delegate void Brush_Function(Vector2 world_position);
         // This is the function called when a left click happens
@@ -32,7 +31,13 @@ namespace FreeDraw
 
         // Used to reference THIS specific file without making all methods static
         public static Drawable drawable;
-        // MUST HAVE READ/WRITE enabled set in the file editor of Unity
+        // MUST HAVE READ/WRITE enabled set in the file editor of 
+
+        //Image AI Generation
+        public SpriteToPNG spriteToPNG;
+        public ImageGenerationManager imageGenerator;
+
+        public SpriteRenderer spriteRenderer;
         Sprite drawable_sprite;
         Texture2D drawable_texture;
 
@@ -43,7 +48,113 @@ namespace FreeDraw
         bool mouse_was_previously_held_down = false;
         bool no_drawing_on_current_drag = false;
 
-        public SpriteToPNG spriteToPNG;
+        void Awake()
+        {
+            drawable = this;
+            // DEFAULT BRUSH SET HERE
+            current_brush = PenBrush;
+
+            drawable_sprite = spriteRenderer.sprite;
+            drawable_texture = drawable_sprite.texture;
+
+            // Initialize clean pixels to use
+            clean_colours_array = new Color[(int)drawable_sprite.rect.width * (int)drawable_sprite.rect.height];
+            for (int x = 0; x < clean_colours_array.Length; x++)
+                clean_colours_array[x] = Reset_Colour;
+
+            // Should we reset our canvas image when we hit play in the editor?
+            if (Reset_Canvas_On_Play)
+                ResetCanvas();
+        }
+
+        // This is where the magic happens.
+        // Detects when user is left clicking, which then call the appropriate function
+        void Update()
+        {
+            //OnMouseDraw();
+            OnTouchDraw();
+        }
+
+        private void OnMouseDraw()
+        {
+            // Is the user holding down the left mouse button?
+            bool mouse_held_down = Input.GetMouseButton(0);
+            if (mouse_held_down && !no_drawing_on_current_drag)
+            {
+                // Convert mouse coordinates to world coordinates
+                Vector2 mouse_world_position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+                // Check if the current mouse position overlaps our image
+                Collider2D hit = Physics2D.OverlapPoint(mouse_world_position, Drawing_Layers.value);
+                BeginDraw(hit, mouse_world_position);
+            }
+            // Mouse is released
+            else if (!mouse_held_down)
+            {
+                previous_drag_position = Vector2.zero;
+                no_drawing_on_current_drag = false;
+            }
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                spriteToPNG.SaveSketch();
+                //StartCoroutine(GenerateImage());
+            }
+            mouse_was_previously_held_down = mouse_held_down;
+        }
+
+        void OnTouchDraw()
+        {
+            if (Input.touchCount > 0)
+            {
+                Debug.Log("is touching");
+                Touch touch = Input.GetTouch(0);
+
+                switch (touch.phase)
+                {
+                    case TouchPhase.Began:
+                        if (no_drawing_on_current_drag) return;
+                        // Convert mouse coordinates to world coordinates
+                        Vector2 touch_world_position = Camera.main.ScreenToWorldPoint(new Vector2(
+                            touch.position.x, touch.position.y));
+
+                        // Check if the current mouse position overlaps our image
+                        Collider2D hit = Physics2D.OverlapPoint(touch_world_position, Drawing_Layers.value);
+                        mouse_was_previously_held_down = true;
+                        BeginDraw(hit, touch_world_position);
+                        break;
+
+                    case TouchPhase.Ended:
+                        mouse_was_previously_held_down = false;
+                        previous_drag_position = Vector2.zero;
+                        no_drawing_on_current_drag = false;
+                        spriteToPNG.SaveSketch();
+                        break;
+                }
+            }
+        }
+
+        void BeginDraw(Collider2D hit, Vector2 worlPosition)
+        {
+            if (hit != null && hit.transform != null)
+            {
+                // We're over the texture we're drawing on!
+                // Use whatever function the current brush is
+                current_brush(worlPosition);
+            }
+
+            else
+            {
+                // We're not over our destination texture
+                previous_drag_position = Vector2.zero;
+                if (!mouse_was_previously_held_down)
+                {
+                    // This is a new drag where the user is left clicking off the canvas
+                    // Ensure no drawing happens until a new drag is started
+                    no_drawing_on_current_drag = true;
+                }
+            }
+        }
 
 
         //////////////////////////////////////////////////////////////////////////////
@@ -130,60 +241,6 @@ namespace FreeDraw
         }
         //////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-        // This is where the magic happens.
-        // Detects when user is left clicking, which then call the appropriate function
-        void Update()
-        {
-            // Is the user holding down the left mouse button?
-            bool mouse_held_down = Input.GetMouseButton(0);
-            if (mouse_held_down && !no_drawing_on_current_drag)
-            {
-                // Convert mouse coordinates to world coordinates
-                Vector2 mouse_world_position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-                // Check if the current mouse position overlaps our image
-                Collider2D hit = Physics2D.OverlapPoint(mouse_world_position, Drawing_Layers.value);
-                if (hit != null && hit.transform != null)
-                {
-                    // We're over the texture we're drawing on!
-                    // Use whatever function the current brush is
-                    current_brush(mouse_world_position);
-                }
-
-                else
-                {
-                    // We're not over our destination texture
-                    previous_drag_position = Vector2.zero;
-                    if (!mouse_was_previously_held_down)
-                    {
-                        // This is a new drag where the user is left clicking off the canvas
-                        // Ensure no drawing happens until a new drag is started
-                        no_drawing_on_current_drag = true;
-                    }
-                }
-            }
-            // Mouse is released
-            else if (!mouse_held_down)
-            {
-                previous_drag_position = Vector2.zero;
-                no_drawing_on_current_drag = false;
-            }
-
-            if (Input.GetMouseButtonUp(0))
-            {
-                spriteToPNG.SaveSketch();
-
-            }
-            mouse_was_previously_held_down = mouse_held_down;
-        }
-
-
-
         // Set the colour of pixels in a straight line from start_point all the way to end_point, to ensure everything inbetween is coloured
         public void ColourBetween(Vector2 start_point, Vector2 end_point, int width, Color color)
         {
@@ -202,10 +259,6 @@ namespace FreeDraw
                 MarkPixelsToColour(cur_position, width, color);
             }
         }
-
-
-
-
 
         public void MarkPixelsToColour(Vector2 center_pixel, int pen_thickness, Color color_of_pen)
         {
@@ -265,16 +318,15 @@ namespace FreeDraw
             drawable_texture.Apply();
         }
 
-
         public Vector2 WorldToPixelCoordinates(Vector2 world_position)
         {
             // Change coordinates to local coordinates of this image
-            Vector3 local_pos = transform.InverseTransformPoint(world_position);
+            Vector3 local_pos = spriteRenderer.transform.InverseTransformPoint(world_position);
 
             // Change these to coordinates of pixels
             float pixelWidth = drawable_sprite.rect.width;
             float pixelHeight = drawable_sprite.rect.height;
-            float unitsToPixels = pixelWidth / drawable_sprite.bounds.size.x * transform.localScale.x;
+            float unitsToPixels = pixelWidth / drawable_sprite.bounds.size.x * spriteRenderer.transform.localScale.x;
 
             // Need to center our coordinates
             float centered_x = local_pos.x * unitsToPixels + pixelWidth / 2;
@@ -286,7 +338,6 @@ namespace FreeDraw
             return pixel_pos;
         }
 
-
         // Changes every pixel to be the reset colour
         public void ResetCanvas()
         {
@@ -294,25 +345,14 @@ namespace FreeDraw
             drawable_texture.Apply();
         }
 
+        #region Image Generator
 
 
-        void Awake()
+        IEnumerator GenerateImage()
         {
-            drawable = this;
-            // DEFAULT BRUSH SET HERE
-            current_brush = PenBrush;
-
-            drawable_sprite = this.GetComponent<SpriteRenderer>().sprite;
-            drawable_texture = drawable_sprite.texture;
-
-            // Initialize clean pixels to use
-            clean_colours_array = new Color[(int)drawable_sprite.rect.width * (int)drawable_sprite.rect.height];
-            for (int x = 0; x < clean_colours_array.Length; x++)
-                clean_colours_array[x] = Reset_Colour;
-
-            // Should we reset our canvas image when we hit play in the editor?
-            if (Reset_Canvas_On_Play)
-                ResetCanvas();
+            yield return new WaitForSeconds(1);
+            imageGenerator.GenerateImage();
         }
+        #endregion
     }
 }

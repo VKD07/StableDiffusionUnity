@@ -46,7 +46,10 @@ public class ImageGenerationManager : MonoBehaviour
 
         //else
         //{
+
         StartCoroutine(MakeRequest());
+        StartCoroutine(ImageGenerationProgress.instance.RequestImageGenerationProgress());
+
         //}
     }
 

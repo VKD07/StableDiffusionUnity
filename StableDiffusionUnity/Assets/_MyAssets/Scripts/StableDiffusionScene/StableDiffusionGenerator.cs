@@ -44,11 +44,7 @@ public class StableDiffusionGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            StartCoroutine(MakeRequest());
-            //Generate();
-        }
+       
     }
 
     public void Generate()

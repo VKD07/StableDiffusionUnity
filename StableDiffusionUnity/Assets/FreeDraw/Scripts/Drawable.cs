@@ -47,7 +47,7 @@ namespace FreeDraw
         Color32[] cur_colors;
         bool mouse_was_previously_held_down = false;
         bool no_drawing_on_current_drag = false;
-
+        bool switchToTouch;
         void Awake()
         {
             drawable = this;
@@ -71,8 +71,29 @@ namespace FreeDraw
         // Detects when user is left clicking, which then call the appropriate function
         void Update()
         {
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                if (!switchToTouch)
+                {
+                    switchToTouch = true;
+                }
+                else
+                {
+                    switchToTouch = false;
+                }
+            }
+
+            switch (switchToTouch)
+            {
+                case true:
+                    OnTouchDraw();
+                    break;
+                case false:
+                    OnMouseDraw();
+                    break;
+            }
             //OnMouseDraw();
-            OnTouchDraw();
+            //OnTouchDraw();
         }
 
         private void OnMouseDraw()

@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class ImageToSpriteConverter : MonoBehaviour
 {
-    
     public Sprite LoadSpriteFromFile(string generatedImgPath)
     {
         try

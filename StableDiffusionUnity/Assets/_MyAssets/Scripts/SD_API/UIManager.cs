@@ -6,15 +6,14 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public static UIManager instance { get; private set; }
+    [SerializeField] Image generatedImageUI;
+    [SerializeField] Slider imgGenerationProgress;
+    [SerializeField] ImageToSpriteConverter spriteConverter;
 
     private void Awake()
     {
         instance = this;
     }
-
-    [SerializeField] Image generatedImageUI;
-    [SerializeField] Slider imgGenerationProgress;
-    [SerializeField] ImageToSpriteConverter spriteConverter;
 
     #region SETTER
     public void SetGeneratedImageUI(string imgPath)
@@ -32,6 +31,4 @@ public class UIManager : MonoBehaviour
         imgGenerationProgress.gameObject.SetActive(active);
     }
     #endregion
-
-
 }

@@ -43,6 +43,13 @@ namespace FreeDraw
             SetMarkerColour(c);
             Drawable.drawable.SetPenBrush();
         }
+        public void SetMarkerBlack()
+        {
+            Color c = Color.black;
+            c.a = Transparency;
+            SetMarkerColour(c);
+            Drawable.drawable.SetPenBrush();
+        }
         public void SetMarkerGreen()
         {
             Color c = Color.green;

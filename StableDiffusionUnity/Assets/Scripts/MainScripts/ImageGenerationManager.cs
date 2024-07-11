@@ -102,6 +102,7 @@ public class ImageGenerationManager : MonoBehaviour
         string json = $@"
         {{
             'prompt': '{promptText}',
+            'model': 'v1-5-pruned-emaonly',
             'init_images': ['{ConvertImageToBase64(imageName)}'],
             'cfg_scale': {cfgScaleValue},
             'width' : {width},

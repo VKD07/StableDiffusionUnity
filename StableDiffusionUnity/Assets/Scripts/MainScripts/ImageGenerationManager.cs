@@ -30,14 +30,16 @@ public class ImageGenerationManager : MonoBehaviour
     [Header("=== GENERATED IMAGE SETTINGS ===")]
     [SerializeField] string generatedImgFolder;
     [SerializeField] string imageName;
+    [SerializeField] DeveloperUIManager developerUIManager;
     string generatedImgPath;
-
-    DeveloperUIManager developerUIManager;
 
     private void Awake()
     {
         generatedImgPath = Path.Combine(Application.streamingAssetsPath, generatedImgFolder);
-        developerUIManager = DeveloperUIManager.instance;
+    }
+
+    private void Start()
+    {
         SetDeveloperUIValues();
     }
 
@@ -52,18 +54,8 @@ public class ImageGenerationManager : MonoBehaviour
 
     public void GenerateImage()
     {
-        //if (promptText.text == "" || promptText.text == "Please enter a prompt")
-        //{
-        //    promptText.text = "Please enter a prompt";
-        //}
-
-        //else
-        //{
-
         StartCoroutine(MakeRequest());
         StartCoroutine(ImageGenerationProgress.instance.RequestImageGenerationProgress());
-
-        //}
     }
 
     IEnumerator MakeRequest()

@@ -7,6 +7,9 @@ using UnityEngine.UIElements.Experimental;
 public class ImageGenerationProgress : MonoBehaviour
 {
     public static ImageGenerationProgress instance { get; private set; }
+
+    bool getProgressValue = true;
+    float progressValue;
     private void Awake()
     {
         instance = this;
@@ -17,21 +20,12 @@ public class ImageGenerationProgress : MonoBehaviour
         DrawingUIManager.instance.SetActiveSliderProgressUI(false);
     }
 
-    bool getProgressValue = true;
-    float progressValue;
-
     public IEnumerator RequestImageGenerationProgress()
     {
+        DrawingUIManager.instance.SetActiveSliderProgressUI(true);
+        getProgressValue = true;
         while (getProgressValue)
         {
-            if (progressValue >= 0.99f)
-            {
-                DrawingUIManager.instance.SetActiveSliderProgressUI(false);
-                getProgressValue = false;
-                break;
-            }
-
-            DrawingUIManager.instance.SetActiveSliderProgressUI(true);
             yield return RequestGenerationProgressFromWeb();
             DrawingUIManager.instance.SetProgressSliderValue(progressValue);
         }
@@ -49,15 +43,22 @@ public class ImageGenerationProgress : MonoBehaviour
 
         var deserializeGetData = JsonUtility.FromJson<GenerationProgress>(getRequest.downloadHandler.text);
         progressValue = deserializeGetData.progress;
-     
-    }
 
-    public class GenerationProgress
-    {
-        public float progress;
-        public int eta_relative;
-        public object state;
-        public string current_image;
-        public string textinfo;
+        if (progressValue >= 0.90f)
+        {
+            progressValue = 0;
+            DrawingUIManager.instance.SetActiveSliderProgressUI(false);
+            StopAllCoroutines();
+            getProgressValue = false;
+        }
     }
+}
+
+public class GenerationProgress
+{
+    public float progress;
+    public int eta_relative;
+    public object state;
+    public string current_image;
+    public string textinfo;
 }

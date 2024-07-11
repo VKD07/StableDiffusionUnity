@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SD_API.unity
+    path: Assets/Scenes/DefaultSize_ImageGeneration.unity
     guid: e80164cf9bfde934282e95a5fb7ae408
   m_configObjects: {}

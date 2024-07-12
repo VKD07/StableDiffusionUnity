@@ -12,7 +12,8 @@ public class SpriteToPNG : MonoBehaviour
     string savePath;
     private void Awake()
     {
-        savePath = Path.Combine(Application.streamingAssetsPath, "Sketches");
+        //savePath = Path.Combine(Application.streamingAssetsPath, "Sketches");
+        savePath = Path.Combine("C:\\Users\\vince\\Documents\\ComfyUI\\ComfyUI_windows_portable\\ComfyUI\\input");
     }
 
     public void SaveSketch()

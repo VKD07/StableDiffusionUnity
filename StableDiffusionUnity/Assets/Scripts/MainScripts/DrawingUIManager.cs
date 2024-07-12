@@ -14,6 +14,11 @@ public class DrawingUIManager : MonoBehaviour
         instance = this;
     }
 
+    private void LateUpdate()
+    {
+       
+    }
+
     #region SETTER
     public void SetGeneratedImageUI(string imgPath)
     {
@@ -23,6 +28,11 @@ public class DrawingUIManager : MonoBehaviour
     public void SetProgressSliderValue(float value)
     {
         imgGenerationProgress.value = value;
+    }
+
+    public void buttonPrompt(string text)
+    {
+        ComfyUiImgGeneration.Instance.AddTextToPrompt(text);
     }
 
     public void SetActiveSliderProgressUI(bool active)

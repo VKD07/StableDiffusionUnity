@@ -120,6 +120,7 @@ namespace FreeDraw
             {
                 spriteToPNG.SaveSketch();
                 //StartCoroutine(GenerateImage());
+                ComfyUiImgGeneration.Instance.MakeRequest();
             }
             mouse_was_previously_held_down = mouse_held_down;
         }

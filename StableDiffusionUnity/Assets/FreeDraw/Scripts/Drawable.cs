@@ -35,7 +35,6 @@ namespace FreeDraw
 
         //Image AI Generation
         public SpriteToPNG spriteToPNG;
-        public ImageGenerationManager imageGenerator;
 
         public SpriteRenderer spriteRenderer;
         Sprite drawable_sprite;
@@ -71,29 +70,7 @@ namespace FreeDraw
         // Detects when user is left clicking, which then call the appropriate function
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                if (!switchToTouch)
-                {
-                    switchToTouch = true;
-                }
-                else
-                {
-                    switchToTouch = false;
-                }
-            }
-
-            switch (switchToTouch)
-            {
-                case true:
-                    OnTouchDraw();
-                    break;
-                case false:
-                    OnMouseDraw();
-                    break;
-            }
-            //OnMouseDraw();
-            //OnTouchDraw();
+            OnMouseDraw();
         }
 
         private void OnMouseDraw()
@@ -114,13 +91,13 @@ namespace FreeDraw
             {
                 previous_drag_position = Vector2.zero;
                 no_drawing_on_current_drag = false;
-            }
 
-            if (Input.GetMouseButtonUp(0))
-            {
-                spriteToPNG.SaveSketch();
-                //StartCoroutine(GenerateImage());
-                ComfyUiImgGeneration.Instance.MakeRequest();
+                if (Input.GetMouseButtonUp(0))
+                {
+                    spriteToPNG.SaveSketch();
+                    //StartCoroutine(GenerateImage());
+                    ComfyUiImgGeneration.Instance.MakeRequest();
+                }
             }
             mouse_was_previously_held_down = mouse_held_down;
         }
@@ -365,16 +342,7 @@ namespace FreeDraw
         {
             drawable_texture.SetPixels(clean_colours_array);
             drawable_texture.Apply();
+            ComfyUiImgGeneration.Instance.ResetPrompt();
         }
-
-        #region Image Generator
-
-
-        IEnumerator GenerateImage()
-        {
-            yield return new WaitForSeconds(1);
-            imageGenerator.GenerateImage();
-        }
-        #endregion
     }
 }

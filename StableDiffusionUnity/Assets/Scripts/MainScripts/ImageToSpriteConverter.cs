@@ -7,6 +7,7 @@ using UnityEngine;
 
 public static class ImageToSpriteConverter
 {
+    static int currentNumOfFiles;
     public static Sprite LoadSpriteFromFile(string generatedImgPath)
     {
         try
@@ -31,7 +32,7 @@ public static class ImageToSpriteConverter
         }
         catch (Exception ex)
         {
-            Debug.LogError("Error loading sprite from file: " + ex.Message);
+            //Debug.LogError("Error loading sprite from file: " + ex.Message);
             return null;
         }
     }
@@ -39,7 +40,12 @@ public static class ImageToSpriteConverter
     static string GetTheLastGeneratedImageName(string generatedImagePath)
     {
         string[] files = Directory.GetFiles(generatedImagePath);
-        files = files.Where(file => !file.EndsWith(".meta")).ToArray();
-        return Path.GetFileName(files[files.Length - 1]);
+        currentNumOfFiles = files.Length;
+        if (currentNumOfFiles > 0 || files.Length > currentNumOfFiles)
+        {
+            files = files.Where(file => !file.EndsWith(".meta")).ToArray();
+            return Path.GetFileName(files[files.Length - 1]);
+        }
+        return "";
     }
 }

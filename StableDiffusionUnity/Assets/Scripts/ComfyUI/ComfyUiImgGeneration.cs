@@ -6,25 +6,27 @@ using UnityEngine.Networking;
 public class ComfyUiImgGeneration : MonoBehaviour
 {
     public static ComfyUiImgGeneration Instance { get; private set; }
+
+
     private string url = "http://127.0.0.1:8188/prompt";
-    public string imageName = "Sketches";
+
+    [Header("=== IMAGE GENERATION SETTINGS ===")]
+    string checkPointModel = "sd_xl_turbo_1.0_fp16.safetensors";
+    long seedValue = 175275630075615;
     [TextArea, SerializeField] string positivePrompt;
     [TextArea, SerializeField] string negativePrompt;
+
+    //located at ComfyUI\ComfyUI_windows_portable\ComfyUI\Input
+    [SerializeField] string inputImageFileName = "convertedImage.png";
 
     private void Awake()
     {
         Instance = this;
     }
-    void Start()
-    {
 
-    }
-
-    private void Update()
+    private void Start()
     {
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-        }
+        StartCoroutine(SetGeneratedImageToScreen());
     }
 
     public void MakeRequest()
@@ -34,11 +36,42 @@ public class ComfyUiImgGeneration : MonoBehaviour
 
     IEnumerator RequestImage()
     {
-        // Variables to insert into JSON
-        string ckptName = "sd_xl_turbo_1.0_fp16.safetensors";
-        long seedValue = 175275630075615;
-        string imageFileName = "convertedImage.png";
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(GetJsonBody());
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
 
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("Error: " + request.error);
+            }
+            else
+            {
+                string responseText = request.downloadHandler.text;
+                Debug.Log("Response: " + responseText);
+            }
+
+            yield return new WaitForSeconds(.5f);
+
+            //Gettting the last generated image on comfy UI temp
+        }
+    }
+
+    IEnumerator SetGeneratedImageToScreen()
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(.5f);
+            DrawingUIManager.instance.SetGeneratedImageUI("C:\\Users\\vince\\Documents\\ComfyUI\\ComfyUI_windows_portable\\ComfyUI\\temp");
+        }
+    }
+
+    string GetJsonBody()
+    {
         // Updated JSON workflow with variables
         string workflowJson = $@"
         {{
@@ -134,7 +167,7 @@ public class ComfyUiImgGeneration : MonoBehaviour
           }},
           ""20"": {{
             ""inputs"": {{
-              ""ckpt_name"": ""{ckptName}""
+              ""ckpt_name"": ""{checkPointModel}""
             }},
             ""class_type"": ""CheckpointLoaderSimple"",
             ""_meta"": {{
@@ -207,7 +240,7 @@ public class ComfyUiImgGeneration : MonoBehaviour
           }},
           ""44"": {{
             ""inputs"": {{
-              ""image"": ""{imageFileName}"",
+              ""image"": ""{inputImageFileName}"",
               ""upload"": ""image""
             }},
             ""class_type"": ""LoadImage"",
@@ -218,35 +251,16 @@ public class ComfyUiImgGeneration : MonoBehaviour
           }}
         }}";
 
-        string jsonData = workflowJson;
-
-
-        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
-        {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            yield return request.SendWebRequest();
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError("Error: " + request.error);
-            }
-            else
-            {
-                string responseText = request.downloadHandler.text;
-                Debug.Log("Response: " + responseText);
-            }
-
-            yield return new WaitForSeconds(.5f);
-            DrawingUIManager.instance.SetGeneratedImageUI("C:\\Users\\vince\\Documents\\ComfyUI\\ComfyUI_windows_portable\\ComfyUI\\temp");
-        }
+        return workflowJson;
     }
 
     public void AddTextToPrompt(string newPrompt)
     {
         positivePrompt = positivePrompt + ", " + newPrompt;
+    }
+
+    public void ResetPrompt()
+    {
+        positivePrompt = "";
     }
 }

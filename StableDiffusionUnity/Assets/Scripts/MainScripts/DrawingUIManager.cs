@@ -7,7 +7,7 @@ public class DrawingUIManager : MonoBehaviour
 {
     public static DrawingUIManager instance { get; private set; }
     [SerializeField] Image generatedImageUI;
-    [SerializeField] Slider imgGenerationProgress;
+    Slider imgGenerationProgress;
 
     private void Awake()
     {

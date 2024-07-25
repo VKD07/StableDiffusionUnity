@@ -7,35 +7,35 @@ using UnityEngine.UI;
 
 public class ComfyUIDeveloperUI : MonoBehaviour
 {
+    public static ComfyUIDeveloperUI instance { get; private set; }
     [Header("=== ENABLE KEY ===")]
     [SerializeField] KeyCode enableKey = KeyCode.F12;
     [Header("=== UI REFERENCES ===")]
     [SerializeField] GameObject developerUIPanel;
     [SerializeField] ButtonPrompts[] btnPrompts;
+    [SerializeField] TMP_InputField controlNetModel;
+    [SerializeField] TMP_InputField checkPointModel;
+    [SerializeField] TMP_InputField additionalPrompt;
+    [SerializeField] TMP_InputField negativeprompt;
+
+    #region Getter
+    public string GetControlNetModel => controlNetModel.text;
+    public string GetCheckPointModel => checkPointModel.text;
+    public string GetAddtionalPrompt => additionalPrompt.text;
+    public string GetNegativePrompt => negativeprompt.text;
+    #endregion
 
     private void Awake()
     {
+        instance = this;
         developerUIPanel.SetActive(false);
         ApplyInputFieldTextToBtnPrompt();
-    }
-
-    private void Start()
-    {
     }
 
     private void Update()
     {
         SetActiveDeveloperUI();
     }
-
-    private void SetActiveDeveloperUI()
-    {
-        if (Input.GetKeyDown(enableKey))
-        {
-            developerUIPanel.SetActive(!developerUIPanel.activeSelf);
-        }
-    }
-
     private void ApplyInputFieldTextToBtnPrompt()
     {
         for (int i = 0; i < btnPrompts.Length; i++)
@@ -46,6 +46,14 @@ public class ComfyUIDeveloperUI : MonoBehaviour
             {
                 ComfyUiImgGeneration.Instance.AddTextToPrompt(btnPrompts[index].inputField.text);
             });
+        }
+    }
+
+    private void SetActiveDeveloperUI()
+    {
+        if (Input.GetKeyDown(enableKey))
+        {
+            developerUIPanel.SetActive(!developerUIPanel.activeSelf);
         }
     }
 }

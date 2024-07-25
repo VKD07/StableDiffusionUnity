@@ -8,8 +8,14 @@ namespace FreeDraw
     // Helper methods used to set drawing settings
     public class DrawingSettings : MonoBehaviour
     {
+        public static DrawingSettings instance { get; private set; }
         public static bool isCursorOverUI = false;
         public float Transparency = 1f;
+
+        private void Awake()
+        {
+            instance = this;
+        }
 
         // Changing pen settings is easy as changing the static properties Drawable.Pen_Colour and Drawable.Pen_Width
         public void SetMarkerColour(Color new_color)
@@ -68,6 +74,14 @@ namespace FreeDraw
         public void SetMarkerYellow()
         {
             Color c = Color.yellow;
+            c.a = Transparency;
+            SetMarkerColour(c);
+            Drawable.drawable.SetPenBrush();
+        }
+
+        public void SetMarkerWhite()
+        {
+            Color c = Color.white;
             c.a = Transparency;
             SetMarkerColour(c);
             Drawable.drawable.SetPenBrush();

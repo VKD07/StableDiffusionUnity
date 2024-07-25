@@ -95,7 +95,6 @@ namespace FreeDraw
                 if (Input.GetMouseButtonUp(0))
                 {
                     spriteToPNG.SaveSketch();
-                    //StartCoroutine(GenerateImage());
                     ComfyUiImgGeneration.Instance.MakeRequest();
                 }
             }
@@ -342,6 +341,7 @@ namespace FreeDraw
         {
             drawable_texture.SetPixels(clean_colours_array);
             drawable_texture.Apply();
+            DrawingSettings.instance.SetMarkerWhite();
             ComfyUiImgGeneration.Instance.ResetPrompt();
         }
     }

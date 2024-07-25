@@ -12,15 +12,21 @@ public class SpriteToPNG : MonoBehaviour
     string savePath;
     private void Awake()
     {
-        //savePath = Path.Combine(Application.streamingAssetsPath, "Sketches");
         savePath = Path.Combine("C:\\Users\\vince\\Documents\\ComfyUI\\ComfyUI_windows_portable\\ComfyUI\\input");
     }
+
 
     public void SaveSketch()
     {
         SaveSpriteToPNG(sprite, savePath, "convertedImage.png");
     }
 
+    /// <summary>
+    /// Saving the drawn sprite to PNG file 
+    /// </summary>
+    /// <param name="sprite">The sprite used to draw our sketch</param>
+    /// <param name="savePath">The path where we are going to save the png</param>
+    /// <param name="fileName">The name of the png image</param>
     public void SaveSpriteToPNG(Sprite sprite, string savePath, string fileName)
     {
         // Extract the texture from the sprite

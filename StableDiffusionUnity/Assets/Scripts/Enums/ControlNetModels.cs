@@ -7,5 +7,5 @@ public enum ControlNetModels
     None = 0,
     control_v11p_sd15_scribble,
     controlnetPreTrained_scribbleV10,
-    /*sd_xl_turbo_1.0_fp16,*/
+    /*sd_xl_turbo_1.0_fp16,*/   
 }
